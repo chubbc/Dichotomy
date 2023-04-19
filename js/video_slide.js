@@ -68,10 +68,14 @@ Reveal.addEventListener( 'fragmenthidden', function( event ) {
 Reveal.addEventListener( 'slidechanged', function( event ) {
       if(event.currentSlide.getAttribute("type") == "videoslide"){
         console.log("videoslide");
-        vidobj=event.currentSlide.slideBackgroundContentElement.getElementsByTagName('video')[0]
+        // vidobj=event.currentSlide.slideBackgroundContentElement.getElementsByTagName('video')[0]
 
-        console.log(event)
-
-        if(automode) Reveal.next()
+        // Animate across slide changes
+        autonext = automode || event.currentSlide.getAttribute("data-fragment")==-1 || event.currentSlide.getAttribute("data-fragment")==null
+        autoprev = event.currentSlide.getAttribute("data-fragment")>-1
+        console.log("autonext = "+autonext)
+        console.log("autoprev = "+autoprev)
+        if(autonext) Reveal.next()
+        else if(autoprev) Reveal.prev()
       }
 } );

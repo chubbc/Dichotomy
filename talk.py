@@ -5,6 +5,8 @@ config.background_color = "#161c20"
 reponame = "Dichotomy"
 arxivnum = "2303.05524"
 
+heading_prev = True
+
 temp = TexTemplate()
 
 temp.add_to_preamble(r"""
@@ -21,6 +23,8 @@ temp.add_to_preamble(r"""
 
 \newcommand\Dp{\overline D}
 \newcommand\Dm{\widecheck D}
+\newcommand\DL{\widetilde D}
+
 
 \newcommand{\rel}[2]      {\!\left( #1 \middle\| #2 \right)}
 \newcommand{\reli}[1]     {\!\left( \rho_{#1} \middle\| \sigma_{#1} \right)}
@@ -57,7 +61,6 @@ footer=VGroup(
 
 class Title(SlideScene):
     def construct(self):
-        # title = MyTex(r"\bfseries\textsc{Quantum dichotomies and coherent\\thermodynamics beyond first-order asymptotics}").scale(1.25).shift(2.5*UP)
         title = MyTex(r"\bfseries\textsc{Quantum dichotomies and\\coherent thermodynamics}").scale(1.25).shift(2.75*UP)
         arxiv = MyTex(r"\bfseries\texttt{arXiv:" + arxivnum + r"}").scale(.75).shift(1.75*UP)
         name = MyTex(r"Christopher T.\ Chubb").shift(0.875*UP)
@@ -72,28 +75,26 @@ class Title(SlideScene):
         footer_big=footer.copy().arrange(RIGHT,buff=.375).to_corner(DOWN).shift(0.0*UP).scale(1.25).set_opacity(1)
 
         self.add(name,title,arxiv,ethz,footer_big,collab)
-        self.slide_break()
+        # self.slide_break()
+
         self.play(Unwrite(VGroup(title,arxiv,name,ethz,collab)))
         self.play(ReplacementTransform(footer_big,footer))
         self.slide_break()
 
-        mt=MyTex(r"Infomation\\theory").set_color(RED).shift(4*LEFT+2*DOWN)
-        cc=MyTex(r"Quantum\\dichotomies").shift(1*DOWN)
-        kk=MyTex(r"Quantum\\thermodynamics").set_color(BLUE).shift(4*RIGHT+2*DOWN)
-        arrow=CurvedArrow(start_point=4*LEFT,end_point=4*RIGHT,angle=-PI/3).shift(1.25*DOWN)
+        mt=MyTex(r"\bfseries Infomation\\theory").set_color(RED).shift(3.5*LEFT+2*DOWN)
+        cc=MyTex(r"\bfseries Quantum\\dichotomies").shift(1.25*DOWN)
+        kk=MyTex(r"\bfseries Quantum\\thermodynamics").set_color(BLUE).shift(3.5*RIGHT+2*DOWN)
+        arrow=CurvedArrow(start_point=4*LEFT,end_point=4*RIGHT,angle=-PI/3).shift(0.75*UP)
         arrow[0].set_color([BLUE,WHITE,RED]).set_sheen_direction(LEFT)
         arrow[1].set_color(BLUE)
-        Group(mt,cc,kk,arrow).shift(2*UP)
+        Group(mt,cc,kk).scale(1.25).shift(2*UP)
 
-        mt_pic=Group(
-            ImageMobject("mt.jpg").set_height(1.5),
-            ImageMobject("jr.jpg").set_height(1.5),
-        ).arrange(RIGHT,buff=0).move_to(4*LEFT+1.5*DOWN)
-        cc_pic=ImageMobject("cc.jpg").set_height(2).shift(1*DOWN)
-        kk_pic=Group(
-            ImageMobject("kk.jpg").set_height(1.5),
-            ImageMobject("plb.jpg").set_height(1.5),
-        ).arrange(RIGHT,buff=0).move_to(4*RIGHT+1.5*DOWN)
+        mt2=MyTex(r"Hypothesis\\testing").set_color(RED).shift(1.25*3.5*LEFT)
+        cc2=MyTex(r"Blackwell\\order").shift(1*UP)
+        kk2=MyTex(r"State\\interconversion").set_color(BLUE).shift(1.25*3.5*RIGHT)
+        Group(mt2,cc2,kk2).shift(1.75*DOWN)
+
+        # Group(mt,cc,kk,mt2,cc2,kk2,arrow).shift(DOWN/2)
 
         self.play(Write(kk))
         self.slide_break()
@@ -103,12 +104,22 @@ class Title(SlideScene):
         self.play(Write(cc))
         self.slide_break()
 
-        self.play(FadeIn(mt_pic))
-        self.play(FadeIn(kk_pic))
-        self.play(FadeIn(cc_pic))
+        self.play(Write(mt2))
+        self.slide_break()
+        self.play(Write(cc2))
+        self.slide_break()
+        self.play(Write(kk2))
         self.slide_break()
 
-        self.play(FadeOut(*[cc,kk,mt,mt_pic,kk_pic,cc_pic,arrow]))
+        # pics=Group(*[
+        #     ImageMobject(name+".jpg").set(height=1.5) for name in ["mt","jr","cc","kk","plb"]
+        # ]).arrange(RIGHT,buff=1).move_to(2.5*UP)
+        #
+        # self.play(FadeIn(pics))
+        # self.slide_break()
+
+        # self.play(FadeOut(*[cc,kk,mt,mt_pic,kk_pic,cc_pic,arrow]))
+        self.play(FadeOut(*[cc,kk,mt,cc2,kk2,mt2,arrow]))
         self.slide_break()
 
         self.play(FadeIn(toc))
@@ -123,13 +134,36 @@ class Title(SlideScene):
 
         self.play(toc[-1].animate.scale(1/1.2).set_color(WHITE))
 
+        tocindex=-1
+        if heading_prev:
+            self.slide_break()
+            heading_next = toc[tocindex+1].copy().move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.remove(toc[tocindex+1])
+            self.play(FadeOut(toc[0:tocindex+1]),FadeOut(toc[tocindex+2:]), TransformFromCopy(toc[tocindex+1],heading_next))
+            self.wait()
+
 class Results(SlideScene):
     def construct(self):
         tocindex = 0
         heading = toc[tocindex].copy()
-        self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
-        self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
-        self.slide_break()
+        heading.save_state()
+        if heading_prev:
+            heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.add(heading,footer)
+        else:
+            self.add(toc[:tocindex],toc[tocindex+1:],footer)
+            self.play(FadeOut(toc[:tocindex]),FadeOut(toc[tocindex+1:]),heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+            self.slide_break()
+
+        # heading = toc[tocindex].copy()
+        # if heading_prev:
+        #     heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+        #     self.add(heading,footer)
+        # else:
+        #     self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
+        #     self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+        #     self.slide_break()
+
 
         subsec1=subsec2=subsec3=subsec4=False
 
@@ -236,7 +270,7 @@ class Results(SlideScene):
 
             entanglement=VGroup(
                 MyTex(r"\bfseries Entanglement"),
-                MyMathTex(r"\left| \phi\right\rangle \xrightarrow{\text{LOCC}} \left| \psi\right\rangle  \quad\iff\quad (\mathrm{Tr}_2|\phi\rangle\langle\phi|,|0\rangle\langle 0|)\prec (\mathrm{Tr}_2|\psi\rangle\langle\psi|,|0\rangle\langle 0|)"),
+                MyMathTex(r"\left| \phi\right\rangle \xrightarrow{\text{LOCC}} \left| \psi\right\rangle  \quad\iff\quad \left(\mathrm{Tr}_2|\phi\rangle\!\langle\phi|,|0\rangle\!\langle 0|\right)\prec \left(\mathrm{Tr}_2|\psi\rangle\!\langle\psi|,|0\rangle\!\langle 0|\right)"),
             ).scale(0.75).set_color(RED).arrange(DOWN,buff=0).move_to(1.25*DOWN)
             purity=VGroup(
                 MyTex(r"\bfseries Purity"),
@@ -307,23 +341,43 @@ class Results(SlideScene):
                 r"""\Dm_\alpha(\rho\|\sigma)~:=&~\begin{dcases}
                     \frac{\log\Tr\left(\sqrt\rho\sigma^{\frac{1-\alpha}{\alpha}} \sqrt\rho\right)^\alpha}{\alpha-1} & \alpha\geq 1/2\\
                     \frac{\log\Tr\left(\sqrt\sigma\rho^{\frac{\alpha}{1-\alpha}} \sqrt\sigma\right)^{1-\alpha}}{\alpha-1} & \alpha\leq 1/2
-                \end{dcases}""",
+                \end{dcases}\\""",
+                r"&\alpha\text{-R\'enyi divergence (Pinched): } & ",
+                r"\DL_\alpha(\rho\|\sigma)~:=&~\lim_{n\to\infty} \frac 1n D_\alpha\rel{\pinch{\rho^{\otimes n}}{\sigma^{\otimes n}}}{\sigma^{\otimes n}}",
             ).scale(0.75)
-            for i in range(4):
+            notation[0:4].shift(0.25*UP).set_color(YELLOW)
+            notation[4:6].set_color(RED)
+            notation[6:8].set_color(GREEN)
+            notation[8:10].set_color(BLUE)
+            notation.move_to(0.5*DOWN)
+            for i in range(5):
                 self.play(FadeIn(notation[2*i:2*i+2]))
                 self.slide_break()
+
             self.play(FadeOut(notation))
             self.slide_break()
 
-        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), ReplacementTransform(heading,toc[tocindex]))
+        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), Restore(heading))
+        if heading_prev:
+            self.slide_break()
+            heading_next = toc[tocindex+1].copy().move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.remove(toc[tocindex+1])
+            self.play(FadeOut(toc[:tocindex]),FadeOut(heading),FadeOut(toc[tocindex+2:]), TransformFromCopy(toc[tocindex+1],heading_next))
+            self.wait()
 
 class HT(SlideScene):
     def construct(self):
         tocindex = 1
+
         heading = toc[tocindex].copy()
-        self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
-        self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
-        self.slide_break()
+        heading.save_state()
+        if heading_prev:
+            heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.add(heading,footer)
+        else:
+            self.add(toc[:tocindex],toc[tocindex+1:],footer)
+            self.play(FadeOut(toc[:tocindex]),FadeOut(toc[tocindex+1:]),heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+            self.slide_break()
 
         subsec1=subsec2=subsec3=False
 
@@ -335,7 +389,6 @@ class HT(SlideScene):
             v=np.random.rand(100)
             v.sort()
             v=1-np.cumsum(v[-1::-1]/sum(v))
-
 
             ht=VGroup(
                 MyTex(r"We want to test between two states $\rho$ and $\sigma$:"),
@@ -357,6 +410,7 @@ class HT(SlideScene):
                 y_range=[0,1,1],
                 x_length=6,
                 y_length=6,
+                z_index=+2,
             ).scale(0.5).shift(DOWN)
             axis_labels=axes.get_axis_labels(x_label=r"\alpha",y_label=r"\beta")
 
@@ -368,28 +422,44 @@ class HT(SlideScene):
             for i in range(1000):
                 xx=0.0
                 yy=0.0
-                while (xx+1)*(yy+1)<=2:
-                    xx=np.random.rand()
-                    yy=np.random.rand()
+                while (xx+1)*(yy+1)<=2.01:
+                    xx=0.99*np.random.rand()
+                    yy=0.99*np.random.rand()
                 x=np.append(x,xx)
                 y=np.append(y,yy)
 
             pts=VGroup(*[
                 Circle(0.02,color=BLUE,fill_opacity=1).move_to(axes.coords_to_point(x[i],y[i])) for i in range(1000)
             ])
-            self.play(Write(pts[0]))
-            self.slide_break()
-            self.play(Write(pts[1]),run_time=1)
-            self.play(Write(pts[2]),run_time=1/2)
-            self.play(Write(pts[3]),run_time=1/4)
-            self.play(Write(pts[4]),run_time=1/8)
-            self.play(Write(pts[5]),run_time=1/16)
-            self.play(Write(pts[6]),run_time=1/32)
-            self.play(Write(pts[7]),run_time=1/64)
-            self.play(Write(pts[8]),run_time=1/128)
-            self.play(Write(pts[9:]))
+
             X=[i/100 for i in range(101)]
             Y=[2/(i/100+1)-1 for i in range(101)]
+            region=Polygon(
+                axes.coords_to_point(1,1),
+                *[axes.coords_to_point(X[i],Y[i]) for i in range(101)],
+                color=BLUE,
+                z_index=+1,
+                fill_opacity=1.0,
+            )
+
+            self.play(FadeIn(pts[0]))
+            self.slide_break()
+
+            self.play(FadeIn(pts[1]))
+            self.slide_break()
+
+            k=100
+            self.play(AnimationGroup(
+                *[FadeIn(pts[i],run_time=1/i) for i in range(2,k)],
+                lag_ratio=1,
+            ))
+            animgrp=AnimationGroup(
+                AnimationGroup( *[FadeIn(pts[i]) for i in range(k,1000)], run_time=3, lag_ratio=0.9 ),
+                FadeIn(region, run_time=3)
+            )
+            self.play(animgrp)
+            self.remove(*pts)
+            self.slide_break()
 
             lorenz=axes.plot_line_graph(
                 x_values = X,
@@ -399,7 +469,7 @@ class HT(SlideScene):
                 line_color=BLUE,
                 stroke_width = 3,
             )
-            self.play(FadeOut(pts),FadeIn(lorenz))
+            self.play(FadeOut(region),FadeIn(lorenz))
             self.slide_break()
 
             self.play(VGroup(axes,axis_labels,lorenz).animate.shift(3*LEFT))
@@ -434,7 +504,6 @@ class HT(SlideScene):
             self.slide_break()
 
         if subsec3:
-
             ax=Axes(
                 x_range=[0,10,10],
                 y_range=[0,1,1],
@@ -556,7 +625,7 @@ class HT(SlideScene):
             self.slide_break()
 
             sigmoid=Group(ax,axis_labels,l,th,smalldev,largedev,moddev,extdev,rel_ent)
-            self.play(sigmoid.animate.scale(0.625).shift(3*LEFT))
+            self.play(sigmoid.animate.scale(0.625).shift(3*LEFT+UP))
             self.slide_break()
 
             tab = MobjectTable(
@@ -582,7 +651,7 @@ class HT(SlideScene):
                 include_outer_lines=False,
                 line_config={"stroke_width": 1},
                 v_buff=0.5,
-            ).scale(0.5).shift(3.5*RIGHT)
+            ).scale(0.4).shift(3.5*RIGHT+1*UP)
 
             tab[1].set(stroke_width=2)
             # tab[4].set(stroke_width=2)
@@ -601,26 +670,63 @@ class HT(SlideScene):
 
             self.play(FadeIn(tab[0][9:11]),FadeIn(tab[0][12:14]))
             self.slide_break()
-            self.play(FadeIn(tab[0][6:8]),FadeIn(tab[0][15:17]))
-            self.slide_break()
-            self.play(FadeIn(tab[0][3:5]),FadeIn(tab[0][18:20]))
-            self.slide_break()
-            self.play(FadeIn(tab[0][21:]))
+            eqn=MyMathTex(r"-\frac 1n \log \beta_n(\epsilon)\simeq D\reli{}+\sqrt{\frac{2V\reli{}}n}\Phi^{-1}(\epsilon)",color=BLUE,scale=0.75).move_to(2.5*DOWN)
+            self.play(Write(eqn))
             self.slide_break()
 
-            self.play(FadeOut(sigmoid),FadeOut(tab[0:2]),FadeOut(tab[4]),FadeOut(tab[8]))
+            self.play(FadeOut(eqn),FadeIn(tab[0][3:5]),FadeIn(tab[0][18:20]))
+            # self.slide_break()
+            eqn=MyMathTex(
+                r"-\frac 1n \log \beta_n(e^{-\lambda n})&\simeq \sup_{t\in (0,1)} \Dp_t\reli{}+\frac{t}{1-t}\lambda\\",
+                r"-\frac 1n \log \beta_n(1-e^{-\lambda n})&\simeq\inf_{t>1} \Dm_t\reli{}-\frac t{1-t}\lambda",
+                color=YELLOW,scale=0.75).move_to(2.5*DOWN)
+            self.play(Write(eqn))
             self.slide_break()
 
-        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), ReplacementTransform(heading,toc[tocindex]))
+            self.play(FadeOut(eqn),FadeIn(tab[0][6:8]),FadeIn(tab[0][15:17]))
+            # self.slide_break()
+            eqn=MyMathTex(
+                r"-\frac 1n \log \beta_n(e^{-\lambda n^a})&\simeq D\reli{}-\sqrt{2V\reli{}\cdot\lambda n^{a-1}}\\",
+                r"-\frac 1n \log \beta_n(1-e^{-\lambda n^a})&\simeq D\reli{}+\sqrt{2V\reli{}\cdot\lambda n^{a-1}}",
+                color=GREEN,scale=0.75).move_to(2.5*DOWN)
+            self.play(Write(eqn))
+            self.slide_break()
 
+            self.play(FadeOut(eqn),FadeIn(tab[0][21:]))
+            # self.slide_break()
+            eqn=MyMathTex(r"-\frac 1n \log \beta_n(1-e^{-\lambda n})\simeq \lambda-D_{\mathrm{max}}\reli{}",color=RED,scale=0.75).move_to(2.5*DOWN)
+            self.play(Write(eqn))
+            self.slide_break()
+
+            self.play(
+                FadeOut(sigmoid),
+                FadeOut(eqn),
+                FadeOut(tab[0:2]),
+                FadeOut(tab[4]),
+                FadeOut(tab[8])
+            )
+            self.slide_break()
+
+        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), Restore(heading))
+        if heading_prev:
+            self.slide_break()
+            heading_next = toc[tocindex+1].copy().move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.remove(toc[tocindex+1])
+            self.play(FadeOut(toc[:tocindex]),FadeOut(heading),FadeOut(toc[tocindex+2:]), TransformFromCopy(toc[tocindex+1],heading_next))
+            self.wait()
 
 class Reduction(SlideScene):
     def construct(self):
         tocindex = 2
         heading = toc[tocindex].copy()
-        self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
-        self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
-        self.slide_break()
+        heading.save_state()
+        if heading_prev:
+            heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.add(heading,footer)
+        else:
+            self.add(toc[:tocindex],toc[tocindex+1:],footer)
+            self.play(FadeOut(toc[:tocindex]),FadeOut(toc[tocindex+1:]),heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+            self.slide_break()
 
         subsec1=subsec2=False
 
@@ -663,7 +769,7 @@ class Reduction(SlideScene):
             self.play(Transform(dpi,newdpi))
             self.slide_break()
 
-            newdpi=MyMathTex(r"\beta_x",r"(\rho_1",r"\|",r"\sigma_1)",r"\geq ",r"\beta_x",r"(\rho_2",r"\|",r"\sigma_2)")
+            newdpi=MyMathTex(r"\beta_x",r"(\rho_1",r"\|",r"\sigma_1)",r"\leq ",r"\beta_x",r"(\rho_2",r"\|",r"\sigma_2)")
             newdpi[:4].set_color(BLUE)
             newdpi[5:].set_color(RED)
             newdpi.shift(dpi[4].get_center()-newdpi[4].get_center())
@@ -671,7 +777,7 @@ class Reduction(SlideScene):
             self.slide_break()
 
             olddpi=dpi
-            dpi=MyMathTex(r"\beta_x",r"(\rho_1",r"\|",r"\sigma_1)",r"\geq ",r"\beta_x",r"(\rho_2",r"\|",r"\sigma_2)",r"~~\forall x")
+            dpi=MyMathTex(r"\beta_x",r"(\rho_1",r"\|",r"\sigma_1)",r"\leq ",r"\beta_x",r"(\rho_2",r"\|",r"\sigma_2)",r" ",r"~~\forall x")
             dpi[:4].set_color(BLUE)
             dpi[5:-1].set_color(RED)
             dpi.shift(olddpi[4].get_center()-dpi[4].get_center())
@@ -688,20 +794,42 @@ class Reduction(SlideScene):
             newwhen[1].set_color(BLUE)
             newwhen[3].set_color(RED)
             # olddpi=dpi
-            newdpi=MyMathTex(r"\beta_x",r"(\rho_1",r"\|",r"\sigma_1)",r"\geq ",r"\beta_{x-\epsilon_\rho}",r"(\rho_2",r"\|",r"\sigma_2)+\epsilon_\sigma",r"~~\forall x").shift(DOWN)
+            newdpi=MyMathTex(
+                r"\beta_x",
+                r"(\rho_1",
+                r"\|",
+                r"\sigma_1)",
+                r"\leq ",
+                r"\beta_{x-\epsilon_\rho}",
+                r"(\rho_2",
+                r"\|",
+                r"\sigma_2)",
+                r"+\epsilon_\sigma",
+                r"~~\forall x").shift(DOWN)
             newdpi[:4].set_color(BLUE)
             newdpi[5:-1].set_color(RED)
             # oldiff=iff
+            self.play(Transform(when,newwhen),Transform(dpi,newdpi))
+            self.slide_break()
+
             newiff=MyMathTex(r"\implies").rotate(-PI/2)
-            self.play(Transform(when,newwhen),Transform(dpi,newdpi),Transform(iff,newiff))
+            self.play(Transform(iff,newiff))
             self.slide_break()
 
             self.play(FadeOut(iff),FadeOut(when),dpi.animate.shift(2*DOWN))
             self.slide_break()
 
-            X=np.linspace(0,1,101)
-            Y1=[1.0, 0.9707698741125, 0.9429692026125, 0.9164492003125, 0.8910892735125, 0.86678119605, 0.8434492378125, 0.821000125, 0.79937844805, 0.7785107525124999, 0.7583597362, 0.7388696846125, 0.72, 0.7017115405125001, 0.68397928005, 0.6667601122, 0.6500311751125001, 0.6337703266125, 0.6179500253125, 0.6025496878125, 0.5875493753125001, 0.5729297731125, 0.5586780177999999, 0.5447700191125, 0.5311996800000001, 0.5179496503125001, 0.5050087375125, 0.4923604962, 0.48, 0.46791149601250004, 0.4560905110125, 0.4445219538, 0.43320178, 0.4221207618, 0.4112699266125, 0.4006405512, 0.3902292316125, 0.3800275751125, 0.37002245005, 0.36022085605, 0.35060992151250003, 0.34118202405, 0.33193932045, 0.3228696046125, 0.3139704451125, 0.3052394322, 0.2966695861125, 0.28825867844999997, 0.28, 0.2718914965125, 0.2639311306125, 0.2561125165125, 0.2484381042, 0.24089735125, 0.23348854751250003, 0.22620999551249998, 0.21906001045, 0.2120328151125, 0.2051309396125, 0.19834871531249998, 0.19168065280000002, 0.18512931461249998, 0.17868931451250003, 0.1723592962, 0.16613791244999998, 0.16002005004999997, 0.1540082350125, 0.14809745124999996, 0.1422828498, 0.1365705956125, 0.13095223781249998, 0.12543026061249996, 0.12, 0.11466041444999997, 0.10941046851250003, 0.10424913281249998, 0.09917203611250003, 0.09418158404999999, 0.08927676480000002, 0.0844501003125, 0.07970721051250002, 0.07504077520000002, 0.07045315031249999, 0.06594655031250002, 0.06151083501249999, 0.057151390312499994, 0.05286735461250003, 0.04865197781249997, 0.044510442512500026, 0.04043902420000001, 0.03643698420000002, 0.03250078125, 0.028632559612499997, 0.024831591112499996, 0.02109715125, 0.01742318205000004, 0.013817074049999989, 0.010270209112499984, 0.006787213012500015, 0.0033623112000000233, 0.0]
-            Y2=[1.0, 0.9164297434195385, 0.8542295386492529, 0.8055693359683184, 0.7658409898581401, 0.7323804085581163, 0.7035288729353733, 0.6781993433459725, 0.6556588648009719, 0.6353705942706472, 0.616950535113686, 0.6000989322988552, 0.5845785570878573, 0.5702017654011259, 0.5568304808071024, 0.5443319455913493, 0.5326107677880413, 0.5215786111240267, 0.5111587991879741, 0.5012900977223615, 0.4919202815987757, 0.48300060598742645, 0.4744901261882408, 0.46635049842564946, 0.4585501397035447, 0.45105933614227756, 0.44385012229798093, 0.43690021648078237, 0.43018851636520783, 0.42369112618881327, 0.4173969544251598, 0.41128025926079315, 0.405331506646209, 0.39953784220231614, 0.3938797891267132, 0.38834939934635937, 0.3829320014882662, 0.37762042556862063, 0.3724009117865028, 0.36726696807981735, 0.3622022695043901, 0.35720762183187227, 0.35226732339229877, 0.3473726705144645, 0.34252169640284286, 0.3377027865396897, 0.33291104685666684, 0.3281384936861852, 0.32337730574783496, 0.3186198020161595, 0.3138616456557691, 0.3090986183209299, 0.30432015522859673, 0.29952224149210627, 0.29470097652526395, 0.2898493093971859, 0.2849602537822296, 0.2800301872993765, 0.2750522820984049, 0.27002311289224734, 0.26493939498824615, 0.2597911726843748, 0.254578745225316, 0.24929227728310294, 0.24393237367644555, 0.2384928777643932, 0.2329712735432185, 0.22736164883614884, 0.22166182419452696, 0.2158698654671785, 0.20998037664944913, 0.20399185299981099, 0.19790308931422174, 0.19171704265573974, 0.18542163823278007, 0.17902821630997373, 0.17252916585443656, 0.1659289557578949, 0.159228587281818, 0.1524294923015767, 0.14553764556039617, 0.13855135098040255, 0.1314817269789122, 0.12433222277090716, 0.11711095718282777, 0.10982237448101922, 0.10247985758209566, 0.09508883961696113, 0.08765942729784615, 0.08020215184591717, 0.07273219655256707, 0.06526078496506149, 0.05779937781237249, 0.0503596096729127, 0.0429574696661571, 0.03560045640053261, 0.028308720238568952, 0.02108955941169416, 0.01395847049557386, 0.0069223217505272605, 0.0]
+            n=1000
+            X=np.linspace(0,1,n+1)
+            Y1=np.random.rand(n+1)
+            Y2=np.random.rand(n+1)
+            for i in range(900):
+                Y1[i]=Y1[i]/8
+            for i in range(400):
+                Y2[i]=Y2[i]/20
+            Y1=1-np.cumsum(np.flip(np.sort(Y1/sum(Y1))))
+            Y2=1-np.cumsum(np.flip(np.sort(Y2/sum(Y2))))
+            Y1[0]=Y2[0]=1
 
             ax=Axes(
                 x_range=[0,1,1],
@@ -729,12 +857,12 @@ class Reduction(SlideScene):
 
             lcd=VGroup(*[
                 ax.plot_line_graph(
-                    x_values = X[5*i:5*i+4],
-                    y_values = Y2[5*i:5*i+4],
+                    x_values = X[25*i:25*i+15],
+                    y_values = Y2[25*i:25*i+15],
                     vertex_dot_radius=0,
                     line_color=RED,
                     stroke_width = 3,
-                ) for i in range(20)
+                ) for i in range(40)
             ])
 
             self.play(Write(ax))
@@ -742,15 +870,17 @@ class Reduction(SlideScene):
             self.add(lcd)
             self.slide_break()
 
-            #x=round(25*(lc2['vertex_dots'][0].get_x()-lcd[0]['vertex_dots'][0].get_x()))
-            x=0
-            y=0
-            while any([Y2[i]+y/100<Y1[i+x] for i in range(101-x)]):
-                y+=1
-            self.play(lc2.animate.shift((x/25)*RIGHT+(y/25)*UP))
+            AX_ORIGIN=lc2.get_center()
+            AX_RIGHT=ax.coords_to_point(1,0)-ax.coords_to_point(0,0)
+            AX_UP=ax.coords_to_point(0,1)-ax.coords_to_point(0,0)
+
+            ix=0
+            x=ix/(n+1)
+            y=max([Y1[i+ix]-Y2[i] for i in range(n+1-ix)])
+            self.play(lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP))
             self.slide_break()
 
-            brace_v=BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y/100)).set_color(YELLOW)
+            brace_v=BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y)).set_color(YELLOW)
             brace_v_lab=MyMathTex(r"\epsilon_\sigma").set_color(YELLOW).scale(0.75).next_to(brace_v,buff=0.1)
             brace_v_lab.add_updater(lambda mobject: mobject.next_to(brace_v,buff=0.1))
 
@@ -758,31 +888,30 @@ class Reduction(SlideScene):
             self.play(FadeIn(brace_v_lab))
             self.slide_break()
 
-            (x_old,y_old)=(x,y)
-            (x,y)=(2,0)
-            while any([Y2[i]+y/100<Y1[i+x] for i in range(101-x)]):
-                y+=1
+            ix=50
+            x=ix/(n+1)
+            y=max([Y1[i+ix]-Y2[i] for i in range(n+1-ix)])
             self.play(
-                lc2.animate.shift(((x-x_old)/25)*RIGHT+((y-y_old)/25)*UP),
-                Transform(brace_v,BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y/100)).set_color(YELLOW)),
+                lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP),
+                Transform(brace_v,BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y)).set_color(YELLOW)),
             )
             self.slide_break()
 
-            brace_h=BraceBetweenPoints(ax.coords_to_point(x/100,1),ax.coords_to_point(0,1)).set_color(YELLOW)
+            brace_h=BraceBetweenPoints(ax.coords_to_point(x,1),ax.coords_to_point(0,1)).set_color(YELLOW)
             brace_h_lab=MyMathTex(r"\epsilon_\rho").set_color(YELLOW).scale(0.75).next_to(brace_h,UP,buff=0.1)
             brace_h_lab.add_updater(lambda mobject: mobject.next_to(brace_h,UP,buff=0.1))
             self.play(Write(brace_h))
             self.play(FadeIn(brace_h_lab))
             self.slide_break()
 
-            (x_old,y_old)=(x,y)
-            (x,y)=(4,0)
-            while any([Y2[i]+y/100<Y1[i+x] for i in range(101-x)]):
-                y+=1
+            ix=100
+            x=ix/(n+1)
+            y=max([Y1[i+ix]-Y2[i] for i in range(n+1-ix)])
             self.play(
-                lc2.animate.shift(((x-x_old)/25)*RIGHT+((y-y_old)/25)*UP),
-                Transform(brace_v,BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y/100)).set_color(YELLOW)),
-                Transform(brace_h,BraceBetweenPoints(ax.coords_to_point(x/100,1),ax.coords_to_point(0,1)).set_color(YELLOW)),
+                lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP),
+                Transform(brace_v,BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y)).set_color(YELLOW)),
+                Transform(brace_v,BraceBetweenPoints(ax.coords_to_point(1,0),ax.coords_to_point(1,y)).set_color(YELLOW)),
+                Transform(brace_h,BraceBetweenPoints(ax.coords_to_point(x,1),ax.coords_to_point(0,1)).set_color(YELLOW)),
             )
             self.slide_break()
 
@@ -791,13 +920,15 @@ class Reduction(SlideScene):
 
             self.play(VGroup(ax,lc1,lc2,lcd,brace_h,brace_v,brace_h_lab,brace_v_lab).animate.shift(3*LEFT))
             ax_err=Axes(
-                x_range=[0,.2,.2],
+                x_range=[0,.3,.3],
                 y_range=[0,.2,.2],
                 x_length=8,
                 y_length=8,
             ).scale(0.5).shift(3*RIGHT).set_color(YELLOW)
             self.play(Write(ax_err))
             self.slide_break()
+
+            AX_ORIGIN=lcd.get_center()
 
             err_labs=VGroup(
                 MyMathTex(r"\epsilon_\rho").scale(1).move_to(ax_err.coords_to_point(0.1,-0.02)),
@@ -809,61 +940,76 @@ class Reduction(SlideScene):
             )
 
             err_pts=VGroup()
-            err_pts+=Circle(radius=0.05,color=YELLOW,fill_opacity=1).move_to(ax_err.coords_to_point(x/100,y/100))
+            err_pts+=Circle(radius=0.05,color=YELLOW,fill_opacity=1).move_to(ax_err.coords_to_point(x,y))
             self.play(Flash(err_pts[-1]),FadeIn(err_pts[-1]))
             self.slide_break()
 
-            for t in range(4,6):
-                (x_old,y_old)=(x,y)
-                (x,y)=(t,-100)
-                while any([Y2[i]+y/100<Y1[i+x] for i in range(101-x)]):
-                    y+=1
+            for ix in [50,150]:
+                x=ix/(n+1)
+                y=max([Y1[i+ix]-Y2[i] for i in range(n+1-ix)])
                 self.play(
-                    lc2.animate.shift(((x-x_old)/25)*RIGHT+((y-y_old)/25)*UP),
-                    run_time=0.1
+                    lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP),
                 )
-            err_pts+=Circle(radius=0.05,color=YELLOW,fill_opacity=1).move_to(ax_err.coords_to_point(x/100,y/100))
-            self.play(Flash(err_pts[-1]),FadeIn(err_pts[-1]))
-            self.slide_break()
+                self.slide_break()
 
-            for t in range(6,8):
-                (x_old,y_old)=(x,y)
-                (x,y)=(t,-100)
-                while any([Y2[i]+y/100<Y1[i+x] for i in range(101-x)]):
-                    y+=1
-                self.play(
-                    lc2.animate.shift(((x-x_old)/25)*RIGHT+((y-y_old)/25)*UP),
-                    run_time=0.1
-                )
-            err_pts+=Circle(radius=0.05,color=YELLOW,fill_opacity=1).move_to(ax_err.coords_to_point(x/100,y/100))
-            self.play(Flash(err_pts[-1]),FadeIn(err_pts[-1]))
-            self.slide_break()
+                err_pts+=Circle(radius=0.05,color=YELLOW,fill_opacity=1).move_to(ax_err.coords_to_point(x,y))
+                self.play(Flash(err_pts[-1]),FadeIn(err_pts[-1]))
+                print((x,y))
+                self.slide_break()
 
-            xx=[i for i in range(10)]
-            yy=[i for i in range(10)]
-            for i in range(10):
-                yy[i]=-10
-                while any([Y2[j]+yy[i]/100<Y1[j+xx[i]] for j in range(101-xx[i])]):
-                    yy[i]+=1
-            # print(xx)
-            # print(yy)
-            yy[-1]=0
+            nn=250
+            xx=[i/(n+1) for i in range(1,nn)]
+            yy=[max([Y1[i+ix]-Y2[i] for i in range(n+1-ix)]) for ix in range(1,nn)]
+
             err_line=ax_err.plot_line_graph(
-                x_values = [xxx/100 for xxx in xx],
-                y_values = [yyy/100 for yyy in yy],
+                x_values = xx[:1],
+                y_values = yy[:1],
                 vertex_dot_radius=0,
                 line_color=YELLOW,
                 stroke_width = 2,
             )
             # self.add(err_line)
-            self.play(FadeIn(err_line),FadeOut(err_pts))
+            # self.play(FadeIn(err_line),FadeOut(err_pts))
+            # self.slide_break()
+
+            self.play(FadeOut(err_pts))
+            x=0
+            y=max(Y1-Y2)
+            self.play(
+                lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP),
+            )
+            circ=Circle(radius=0.05,color=YELLOW,fill_opacity=1,z_index=+1).move_to(ax_err.coords_to_point(x,y))
+            self.play(FadeIn(circ))
+            self.slide_break()
+
+            for it in range(1,nn,2):
+                x=it/(n+1)
+                y=max([Y1[i+it]-Y2[i] for i in range(n+1-it)])
+                if y<0:
+                    break
+                self.remove(err_line)
+                err_line=ax_err.plot_line_graph(
+                    x_values = xx[:it],
+                    y_values = yy[:it],
+                    vertex_dot_radius=0,
+                    line_color=YELLOW,
+                    stroke_width = 2,
+                )
+                self.add(err_line)
+                self.play(
+                    lc2.animate.move_to(AX_ORIGIN+x*AX_RIGHT+y*AX_UP),
+                    circ.animate.move_to(ax_err.coords_to_point(x,y)),
+                    run_time=0.05,
+                    rate_func=linear,
+                )
             self.slide_break()
 
             self.play(
                 FadeOut(VGroup(ax,lc1,lc2,lcd)),
                 FadeOut(ax_err),
-                FadeOut(err_line),
+                FadeOut(*err_line),
                 FadeOut(err_labs),
+                FadeOut(circ),
             )
             self.slide_break()
 
@@ -885,7 +1031,7 @@ class Reduction(SlideScene):
             self.play(Write(whatif))
             self.slide_break()
 
-            pinch_meme=ImageMobject("pinch_meme.jpg").set_height(4).shift(DOWN)
+            pinch_meme=ImageMobject("pinch_meme.jpg").set(height=4).shift(DOWN)
             self.play(whatif.animate.shift(2*UP))
             self.play(FadeIn(pinch_meme))
             self.slide_break()
@@ -894,7 +1040,7 @@ class Reduction(SlideScene):
             self.slide_break()
 
             pinch=VGroup()
-            pinch+=MyMathTex(r"\beta_x\reli{1}",r"\geq ",r"\beta_{x-\epsilon_\rho}\reli{2}",r"~~\forall x")
+            pinch+=MyMathTex(r"\beta_x\reli{1}",r"\leq ",r"\beta_{x-\epsilon_\rho}\reli{2}+\epsilon_\sigma",r"~~\forall x")
             pinch[-1][0].set_color(BLUE)
             pinch[-1][2].set_color(RED)
             pinch+=MyMathTex(r"\impliedby").rotate(-PI/2)
@@ -902,7 +1048,7 @@ class Reduction(SlideScene):
             pinch[-1][0].set_color(BLUE)
             pinch[-1][2].set_color(RED)
             pinch+=MyMathTex(r"\impliedby").rotate(-PI/2)
-            pinch+=MyMathTex(r"\beta_x\rel{\mathcal P_{\sigma_1}(\rho_1)}{\sigma_1}",r"\geq ",r"\beta_{x-\epsilon_\rho}\reli{2}",r"~~\forall x")
+            pinch+=MyMathTex(r"\beta_x\rel{\mathcal P_{\sigma_1}(\rho_1)}{\sigma_1}",r"\leq ",r"\beta_{x-\epsilon_\rho}\reli{2}+\epsilon_\sigma",r"~~\forall x")
             pinch[-1][0].set_color(BLUE)
             pinch[-1][2].set_color(RED)
             pinch.arrange(DOWN).shift(DOWN)
@@ -916,15 +1062,26 @@ class Reduction(SlideScene):
             self.play(FadeOut(whatif),FadeOut(pinch))
             self.slide_break()
 
-        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), ReplacementTransform(heading,toc[tocindex]))
+        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), Restore(heading))
+        if heading_prev:
+            self.slide_break()
+            heading_next = toc[tocindex+1].copy().move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.remove(toc[tocindex+1])
+            self.play(FadeOut(toc[:tocindex]),FadeOut(heading),FadeOut(toc[tocindex+2:]), TransformFromCopy(toc[tocindex+1],heading_next))
+            self.wait()
 
 class Rates(SlideScene):
     def construct(self):
         tocindex = 3
         heading = toc[tocindex].copy()
-        self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
-        self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
-        self.slide_break()
+        heading.save_state()
+        if heading_prev:
+            heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.add(heading,footer)
+        else:
+            self.add(toc[:tocindex],toc[tocindex+1:],footer)
+            self.play(FadeOut(toc[:tocindex]),FadeOut(toc[tocindex+1:]),heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+            self.slide_break()
 
         ax=Axes(
             x_range=[0,10,10],
@@ -1020,7 +1177,7 @@ class Rates(SlideScene):
         self.slide_break()
 
         sigmoid=Group(ax,l,th,rel_ent,zero_err,axis_labels,smalldev,moddev,largedev,extdev)
-        self.play(sigmoid.animate.scale(0.625).shift(3*LEFT))
+        self.play(sigmoid.animate.scale(0.625).shift(3*LEFT+UP))
         self.slide_break()
 
         tab = MobjectTable(
@@ -1048,7 +1205,7 @@ class Rates(SlideScene):
             include_outer_lines=False,
             line_config={"stroke_width": 1},
             v_buff=0.5,
-        ).scale(0.5).shift(3.5*RIGHT)
+        ).scale(0.4).shift(3.5*RIGHT+UP)
 
         tab[1].set(stroke_width=2)
         # tab[4].set(stroke_width=2)
@@ -1066,29 +1223,160 @@ class Rates(SlideScene):
         self.play(*[FadeIn(tab[0][2+3*i]) for i in range(8)])
         self.slide_break()
 
-
         self.play(FadeIn(tab[0][9+3:11+3]),FadeIn(tab[0][12+3:14+3]))
         self.slide_break()
-        self.play(FadeIn(tab[0][6+3:8+3]),FadeIn(tab[0][15+3:17+3]))
+        eqn=MyMathTex(r"R_n(\epsilon)\simeq\frac{D\reli{1}}{D\reli{2}}+\sqrt{\frac{D\reli{1}V\reli{2}}{nD\reli{2}}}\cdot S_\nu^{-1}(\epsilon)",color=BLUE,scale=0.75).move_to(2.5*DOWN)
+        self.play(Write(eqn))
         self.slide_break()
-        self.play(FadeIn(tab[0][3+3:5+3]),FadeIn(tab[0][18+3:20+3]))
+
+        self.play(FadeOut(eqn),FadeIn(tab[0][3+3:5+3]),FadeIn(tab[0][18+3:20+3]))
+        eqn=MyMathTex(r"R_n\left(1-e^{-\lambda n}\right)\simeq\inf_{\substack{t_1>1\\t_2\in(0,1)}}\frac{\Dm_{t_1}\reli{1}+\left(\frac{t_2}{1-t_2}-\frac{t_1}{t_1-1}\right)\lambda}{\Dm_{t_2}\reli{2}}",color=YELLOW,scale=0.75).move_to(2.5*DOWN)
+        self.play(Write(eqn))
         self.slide_break()
-        self.play(FadeIn(tab[0][3:5]),FadeIn(tab[0][21+3:]))
+
+        self.play(FadeOut(eqn),FadeIn(tab[0][6+3:8+3]),FadeIn(tab[0][15+3:17+3]))
+        eqn=MyMathTex(
+            r"R_n\left(e^{-\lambda n^a}\right)&=\frac{D\reli{1}-\left|1-\nu^{-1/2}\right|\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
+            r"R_n\left(1-e^{-\lambda n^a}\right)&=\frac{D\reli{1}+\left[1+\nu^{-1/2}\right]\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
+            ,color=GREEN,scale=0.75).move_to(2.5*DOWN)
+        self.play(Write(eqn))
+        self.slide_break()
+
+        self.play(FadeOut(eqn),FadeIn(tab[0][3:5]),FadeIn(tab[0][21+3:]))
+        eqn=MyMathTex(r"R_n\left(0\right)\stackrel{\text{ev.}}=\inf_{t\in \overline{\mathbb R}} \frac{\Dm_t\reli{1}}{\Dm_t\reli{2}}",color=RED,scale=0.75).move_to(2.5*DOWN)
+        self.play(Write(eqn))
         self.slide_break()
 
         self.play(FadeOut(sigmoid),FadeOut(tab[0:2]),FadeOut(tab[5]),FadeOut(tab[9]))
         self.slide_break()
 
-        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), ReplacementTransform(heading,toc[tocindex]))
+        eqn_lrg=MyMathTex(
+            r"R_n(e^{-\lambda n})",
+            r"""\simeq\inf_{-\lambda < \mu<\lambda}\begin{dcases}
+            \sup_{t_2<0}\inf_{t_1<0}\frac{-\Dm_{t_1}\reli{1}+\left( \frac{t_1}{t_1-1}-\frac{t_2}{t_2-1}\right)\mu}{-\Dm_{t_2}\reli{2}} & \mu\leq -D\rel{\sigma_1}{\rho_1}\\
+            \inf_{0<t_2<0}\sup_{0<t_1<0}\frac{\Dp_{t_1}\reli{1}+\left( \frac{t_1}{1-t_1}-\frac{t_2}{1-t_2}\right)\mu}{\Dp_{t_2}\reli{2}} & -D\rel{\sigma_1}{\rho_1}\leq \mu\leq 0\\
+            \sup_{t_2>1}\inf_{t_1>1}\frac{\Dm_{t_1}\reli{1}+\left( \frac{t_1}{t_1-1}-\frac{t_2}{t_2-1}\right)\mu}{\Dm_{t_2}\reli{2}} & \mu\geq 0
+            \end{dcases}""",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        self.play(Write(eqn_lrg))
+        self.slide_break()
 
+        eqn_lrg_old=eqn_lrg
+        eqn_lrg=MyMathTex(
+            r"\lim_{\lambda\to\infty}",
+            r"R_n(e^{-\lambda n})",
+            r"\gtrsim\inf_{t\in\overline{\mathbb R}}\frac{\DL_t\reli{1}}{\Dm_t\reli{2}}",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        self.play(
+            FadeIn(eqn_lrg[0]),
+            ReplacementTransform(eqn_lrg_old[0:],eqn_lrg[1:])
+        )
+        self.slide_break()
+        self.remove(*eqn_lrg)
+        # self.remove(eqn_lrg_old)
+
+        eqn_lrg=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim",
+            r" ",
+            r"\inf_{t\in\overline{\mathbb R}}\frac{\DL_t\reli{1}}{\Dm_t\reli{2}}",
+            r" ",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        eqn_lrg_new=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim",
+            r"\max\Biggl\lbrace ",
+            r"\inf_{t\in\overline{\mathbb R}}\frac{\DL_t\reli{1}}{\Dm_t\reli{2}}",
+            r",\inf_{t\in\overline{\mathbb R}}\frac{\DL_t^*\reli{1}}{\Dm_t\reli{2}} \Biggr\rbrace",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        self.play(Transform(eqn_lrg,eqn_lrg_new))
+        self.slide_break()
+        self.remove(*eqn_lrg)
+
+        eqn_lrg_old=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim",
+            r"\max\Biggl\{",
+            r"\inf_{t\in\overline{\mathbb R}}{",
+            r"\DL_t\reli{1}",
+            r" ",
+            r"\over \Dm_t\reli{2}}",
+            r",\inf_{t\in\overline{\mathbb R}}{",
+            r"\DL_t^*\reli{1}",
+            r"\over \Dm_t\reli{2}}",
+            r"\Biggr\}",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        eqn_lrg=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim",
+            r"\inf_{t\in\overline{\mathbb R}}{",
+            r"\max\Bigl\{ ",
+            r"\DL_t\reli{1}",
+            r",",
+            r"\DL_t^*\reli{1}",
+            r"\Bigr\}",
+            r"\over \Dm_t\reli{2}}",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        self.play(
+            ReplacementTransform(eqn_lrg_old[0],eqn_lrg[0]),
+            ReplacementTransform(eqn_lrg_old[1],eqn_lrg[2]),
+            ReplacementTransform(eqn_lrg_old[2],eqn_lrg[1]),
+            ReplacementTransform(eqn_lrg_old[3],eqn_lrg[3]),
+            ReplacementTransform(eqn_lrg_old[4],eqn_lrg[4]),
+            ReplacementTransform(eqn_lrg_old[5],eqn_lrg[7]),
+            FadeOut(eqn_lrg_old[6]),
+            ReplacementTransform(eqn_lrg_old[7],eqn_lrg[5]),
+            ReplacementTransform(eqn_lrg_old[8],eqn_lrg[7]),
+            ReplacementTransform(eqn_lrg_old[9],eqn_lrg[6]),
+        )
+        self.slide_break()
+        self.remove(*eqn_lrg)
+        # self.remove(*eqn_lrg_old)
+
+        eqn_lrg_old=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim\inf_{t\in\overline{\mathbb R}}{",
+            r"\max\Bigl\{\DL_t\reli{1},\DL_t^*\reli{1}\Bigr\}",
+            r"\over \Dm_t\reli{2}}",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        eqn_lrg=MyMathTex(
+            r"\lim_{\lambda\to\infty}R_n(e^{-\lambda n})\gtrsim\inf_{t\in\overline{\mathbb R}}{",
+            r"\Dm_t\reli{1}",
+            r"\over \Dm_t\reli{2}}",
+            color=YELLOW,scale=0.625).move_to(0.5*UP)
+        self.play(ReplacementTransform(eqn_lrg_old,eqn_lrg))
+        self.slide_break()
+
+        self.play(FadeOut(eqn_lrg))
+        self.slide_break()
+
+        order=MyMathTex(
+            r"\Dm_t\reli{1}&>\Dm_t\reli{2}~\forall t & &\implies & \left(\rho_1,\sigma_1\right)\succeq \left(\rho_2,\sigma_2\right)\\",
+            r"\Dm_t\reli{1}&\geq \Dm_t\reli{2}~\forall t & &\impliedby & \left(\rho_1,\sigma_1\right)\succeq \left(\rho_2,\sigma_2\right)\\",
+            color=RED,
+            scale=0.75,
+        )
+        self.play(Write(order))
+        self.slide_break()
+
+        self.play(FadeOut(order),FadeOut(eqn))
+        self.slide_break()
+
+        self.play(FadeIn(toc[0:tocindex]),FadeIn(toc[tocindex+1:]), Restore(heading))
+        if heading_prev:
+            self.slide_break()
+            heading_next = toc[tocindex+1].copy().move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.remove(toc[tocindex+1])
+            self.play(FadeOut(toc[:tocindex]),FadeOut(heading),FadeOut(toc[tocindex+2:]), TransformFromCopy(toc[tocindex+1],heading_next))
+            self.wait()
 
 class Conclusion(SlideScene):
     def construct(self):
         tocindex = 4
         heading = toc[tocindex].copy()
-        self.add(toc[0:tocindex],heading,toc[tocindex+1:],footer)
-        self.play(FadeOut(toc[0:tocindex]),FadeOut(toc[tocindex+1:]), heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
-        self.slide_break()
+        heading.save_state()
+        if heading_prev:
+            heading.move_to(ORIGIN).scale(1.5).to_corner(UP)
+            self.add(heading,footer)
+        else:
+            self.add(toc[:tocindex],toc[tocindex+1:],footer)
+            self.play(FadeOut(toc[:tocindex]),FadeOut(toc[tocindex+1:]),heading.animate.move_to(ORIGIN).scale(1.5).to_corner(UP))
+            self.slide_break()
 
         temp = TexTemplate()
         temp.add_to_preamble(r"\usepackage{marvosym} \usepackage{fontawesome}")
@@ -1104,7 +1392,7 @@ class Conclusion(SlideScene):
             MyTex(r"\textbullet Operational interpretations"),
             MyTex(r"\textbullet Resource resonance (weak+strong)"),
             MyTex(r"\textbullet New entropy"),
-            MyTex(r"\textbullet Two-sided error"),
+            MyTex(r"\textbullet Two-sided errors"),
         ).set_color(RED).arrange(DOWN,aligned_edge=LEFT).scale(0.8).shift(3.5*RIGHT+1*UP)
 
         for s in summary1:
