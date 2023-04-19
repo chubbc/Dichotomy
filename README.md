@@ -6,3 +6,5 @@ Talks given on the paper [*Quantum dichotomies and coherent thermodynamics beyon
 
 **Talk 1:** (2022-04-13) Quantum Theory Group, University of Sydney, Sydney, Australia <br>
 **Talk 2:** (2022-04-20) [Marco Tomamichel Group](https://marcotom.info/), Centre for Quantum Technology, National University of Singapore, Singapore
+
+[**Live slides**](https://christopherchubb.com/Dichotomy/)
