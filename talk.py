@@ -94,7 +94,7 @@ class Title(SlideScene):
         kk2=MyTex(r"State\\interconversion").set_color(BLUE).shift(1.25*3.5*RIGHT)
         Group(mt2,cc2,kk2).shift(1.75*DOWN)
 
-        # Group(mt,cc,kk,mt2,cc2,kk2,arrow).shift(DOWN/2)
+        Group(mt,cc,kk,mt2,cc2,kk2,arrow).shift(DOWN/2)
 
         self.play(Write(kk))
         self.slide_break()
@@ -111,15 +111,16 @@ class Title(SlideScene):
         self.play(Write(kk2))
         self.slide_break()
 
-        # pics=Group(*[
-        #     ImageMobject(name+".jpg").set(height=1.5) for name in ["mt","jr","cc","kk","plb"]
-        # ]).arrange(RIGHT,buff=1).move_to(2.5*UP)
-        #
-        # self.play(FadeIn(pics))
-        # self.slide_break()
+        pics=Group(*[
+            ImageMobject(name+".jpg").set(height=1.5) for name in ["mt","jr","cc","kk","plb"]
+        ]).arrange(RIGHT,buff=1).move_to(2.5*UP)
+
+        self.play(AnimationGroup(*[FadeIn(p) for p in pics],lag_ratio=0.5))
+        self.slide_break()
 
         # self.play(FadeOut(*[cc,kk,mt,mt_pic,kk_pic,cc_pic,arrow]))
-        self.play(FadeOut(*[cc,kk,mt,cc2,kk2,mt2,arrow]))
+        # self.play(FadeOut(*[cc,kk,mt,cc2,kk2,mt2,arrow]))
+        self.play(FadeOut(*[cc,kk,mt,cc2,kk2,mt2,arrow,pics]))
         self.slide_break()
 
         self.play(FadeIn(toc))
@@ -1236,14 +1237,14 @@ class Rates(SlideScene):
 
         self.play(FadeOut(eqn),FadeIn(tab[0][6+3:8+3]),FadeIn(tab[0][15+3:17+3]))
         eqn=MyMathTex(
-            r"R_n\left(e^{-\lambda n^a}\right)&=\frac{D\reli{1}-\left|1-\nu^{-1/2}\right|\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
-            r"R_n\left(1-e^{-\lambda n^a}\right)&=\frac{D\reli{1}+\left[1+\nu^{-1/2}\right]\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
+            r"R_n\left(e^{-\lambda n^a}\right)&\simeq\frac{D\reli{1}-\left|1-\nu^{-1/2}\right|\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
+            r"R_n\left(1-e^{-\lambda n^a}\right)&\simeq\frac{D\reli{1}+\left[1+\nu^{-1/2}\right]\sqrt{2V\reli{1}\cdot\lambda n^{a-1}}}{D\reli{2}}\\"
             ,color=GREEN,scale=0.75).move_to(2.5*DOWN)
         self.play(Write(eqn))
         self.slide_break()
 
         self.play(FadeOut(eqn),FadeIn(tab[0][3:5]),FadeIn(tab[0][21+3:]))
-        eqn=MyMathTex(r"R_n\left(0\right)\stackrel{\text{ev.}}=\inf_{t\in \overline{\mathbb R}} \frac{\Dm_t\reli{1}}{\Dm_t\reli{2}}",color=RED,scale=0.75).move_to(2.5*DOWN)
+        eqn=MyMathTex(r"R_n\left(0\right)\simeq\inf_{t\in \overline{\mathbb R}} \frac{\Dm_t\reli{1}}{\Dm_t\reli{2}}",color=RED,scale=0.75).move_to(2.5*DOWN)
         self.play(Write(eqn))
         self.slide_break()
 
@@ -1267,10 +1268,9 @@ class Rates(SlideScene):
             r"R_n(e^{-\lambda n})",
             r"\gtrsim\inf_{t\in\overline{\mathbb R}}\frac{\DL_t\reli{1}}{\Dm_t\reli{2}}",
             color=YELLOW,scale=0.625).move_to(0.5*UP)
-        self.play(
-            FadeIn(eqn_lrg[0]),
-            ReplacementTransform(eqn_lrg_old[0:],eqn_lrg[1:])
-        )
+        self.play(ReplacementTransform(eqn_lrg_old[0:],eqn_lrg[1:]))
+        self.slide_break()
+        self.play(FadeIn(eqn_lrg[0]))
         self.slide_break()
         self.remove(*eqn_lrg)
         # self.remove(eqn_lrg_old)
@@ -1391,7 +1391,7 @@ class Conclusion(SlideScene):
         summary2=VGroup(
             MyTex(r"\textbullet Operational interpretations"),
             MyTex(r"\textbullet Resource resonance (weak+strong)"),
-            MyTex(r"\textbullet New entropy"),
+            MyTex(r"\textbullet New relative entropy"),
             MyTex(r"\textbullet Two-sided errors"),
         ).set_color(RED).arrange(DOWN,aligned_edge=LEFT).scale(0.8).shift(3.5*RIGHT+1*UP)
 
@@ -1412,5 +1412,3 @@ class Conclusion(SlideScene):
         footer_big=concfooter.copy().arrange(RIGHT,buff=.375).to_corner(DOWN).shift(0.25*UP).scale(1.25).set_opacity(1)
         self.play(Transform(concfooter,footer_big))
         self.play(Write(thanks))
-
-        self.slide_break()
