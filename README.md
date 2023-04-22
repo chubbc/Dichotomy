@@ -1,7 +1,10 @@
-Allows for a <a href="https://github.com/hakimel/reveal.js/">reveal.js</a> presentation consisting of queued up Manim animations. Based on <a href="https://github.com/anjandn/manim_reveal">anjandn/manim_reveal</a>, but updated to work with ManimCE 0.7.0 (manim_reveal was broken by manim updates).
+Talks given on the paper [*Quantum dichotomies and coherent thermodynamics beyond first-order asymptotics*](https://arxiv.org/abs/2303.05524). This work is in collaboration with Patryk Lipka-Bartosik, [Joseph M. Renes](https://people.phys.ethz.ch/~renes/), [Marco Tomamichel](https://marcotom.info/), and [Kamil Korzekwa](http://kamilkorzekwa.com/).
 
-Go <a href="https://christopherchubb.com/manim_slides">here</a> for a live demonstration of it working.
+**Title:** Quantum dichotomies and coherent thermodynamics
 
-Manim code is put into <code>./talk.py</code>, and the corresponding slides need to be put into <code>./index.html</code>. To compile the manim videos for slide X run <code>manimce talk.py X</code>.
+**Abstract:** In this talk I will consider the problem of exact and approximate transformations of quantum dichotomies in the asymptotic regime, i.e. when there exists a quantum channel which approximately maps a pair of iid product states to another pair of iid product states. Specifically, I will give not only first-order asymptotic results, but also second-order asymptotic results in *all* error regimes, including small and large deviation error regimes, as well as the zero-error case. I will also discuss how the state interconversion problem in several resource theories, most notably thermodynamics, are in fact examples of this more general problem, and thus the applications of our results to coherent quantum thermodynamics. I will also review the known asymptotic results concerning binary quantum hypothesis testing, which are central in our proofs.
 
-To view a local copy you must run <code>npm start</code> on the local copy.
+**Talk 1:** (2022-04-13) Quantum Theory Group, University of Sydney, Sydney, Australia <br>
+**Talk 2:** (2022-04-20) [Marco Tomamichel Group](https://marcotom.info/), Centre for Quantum Technology, National University of Singapore, Singapore
+
+[**Live slides**](https://christopherchubb.com/Dichotomy/)
