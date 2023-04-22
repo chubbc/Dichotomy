@@ -271,7 +271,7 @@ class Results(SlideScene):
 
             entanglement=VGroup(
                 MyTex(r"\bfseries Entanglement"),
-                MyMathTex(r"\left| \phi\right\rangle \xrightarrow{\text{LOCC}} \left| \psi\right\rangle  \quad\iff\quad \left(\mathrm{Tr}_2|\phi\rangle\!\langle\phi|,|0\rangle\!\langle 0|\right)\prec \left(\mathrm{Tr}_2|\psi\rangle\!\langle\psi|,|0\rangle\!\langle 0|\right)"),
+                MyMathTex(r"\left| \phi\right\rangle \xrightarrow{\text{LOCC}} \left| \psi\right\rangle  \quad\iff\quad \left(\mathrm{Tr}_2|\phi\rangle\!\langle\phi|,|0\rangle\!\langle 0|\right)\preceq \left(\mathrm{Tr}_2|\psi\rangle\!\langle\psi|,|0\rangle\!\langle 0|\right)"),
             ).scale(0.75).set_color(RED).arrange(DOWN,buff=0).move_to(1.25*DOWN)
             purity=VGroup(
                 MyTex(r"\bfseries Purity"),
@@ -1346,8 +1346,8 @@ class Rates(SlideScene):
         self.slide_break()
 
         order=MyMathTex(
-            r"\Dm_t\reli{1}&>\Dm_t\reli{2}~\forall t & &\implies & \left(\rho_1,\sigma_1\right)\succeq \left(\rho_2,\sigma_2\right)\\",
-            r"\Dm_t\reli{1}&\geq \Dm_t\reli{2}~\forall t & &\impliedby & \left(\rho_1,\sigma_1\right)\succeq \left(\rho_2,\sigma_2\right)\\",
+            r"\Dm_t\reli{1}&>\Dm_t\reli{2}~\forall t & &\implies & \left(\rho_1^{\otimes n},\sigma_1^{\otimes n}\right)\stackrel{\text{ev.}}\succeq \left(\rho_2^{\otimes n},\sigma_2^{\otimes n}\right)\\",
+            r"\Dm_t\reli{1}&\geq \Dm_t\reli{2}~\forall t & &\impliedby & \left(\rho_1^{\otimes n},\sigma_1^{\otimes n}\right)\stackrel{\text{ev.}}\succeq \left(\rho_2^{\otimes n},\sigma_2^{\otimes n}\right)\\",
             color=RED,
             scale=0.75,
         )
